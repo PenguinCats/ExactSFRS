@@ -37,6 +37,7 @@ class Args(object):
         self.train_area_size_range = [60, 300]  # region 大约对应多少个格子的范围
         self.positive_noise_rate = 0.1
         self.positive_shift_rate = 0.3
+        self.hard_example_rate = 0.1
         self.negative_noise_rate = 0.5
         self.negative_shift_rate = 0.7
 

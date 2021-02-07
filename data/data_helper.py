@@ -20,3 +20,15 @@ def load_category():
     n_category = len(big_category_dict)
 
     return big_category_dict, n_category
+
+
+def is_intersect(rq_coordinate, r_neg_coordinate):
+    lon_max = min((rq_coordinate[0] + rq_coordinate[2]), (r_neg_coordinate[0] + r_neg_coordinate[2]))
+    lon_min = max(rq_coordinate[0], r_neg_coordinate[0])
+    lat_max = min((rq_coordinate[1] + rq_coordinate[3]), (r_neg_coordinate[1] + r_neg_coordinate[3]))
+    lat_min = max(rq_coordinate[1], r_neg_coordinate[1])
+
+    if lon_max < lon_min or lat_max < lat_min:
+        return False
+    else:
+        return True
