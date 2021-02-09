@@ -8,6 +8,8 @@
 """
 
 import os
+import random
+import numpy as np
 import pandas as pd
 from args import args
 
@@ -32,3 +34,35 @@ def is_intersect(rq_coordinate, r_neg_coordinate):
         return False
     else:
         return True
+
+
+def generate_r_positive(rq_feature):
+    total_objects = np.sum(rq_feature)
+    n_noise_object = int(total_objects * args.positive_noise_rate)
+    n_shift_object = int(total_objects * args.positive_shift_rate)
+
+    a, b, c = np.where(rq_feature > 0)
+    coordinates = [[a[idx], b[idx], c[idx]]*rq_feature[a[idx]][b[idx]][c[idx]] for idx in range(len(a))]
+    # random delete object
+    objects_to_delete = random.sample(coordinates, n_noise_object)
+
+    for obj in objects_to_delete:
+        rq_feature[obj[0], obj[1], obj[2]] -= 1
+
+    # random shift object
+    objects_to_shift = random.sample(coordinates, n_shift_object)
+    for obj in objects_to_shift:
+        na = np.random.randint(-obj[0], rq_feature.shape[0]-obj[0]-1)
+        nb = np.random.randint(-obj[1], rq_feature.shape[1]-obj[1]-1)
+        nc = np.random.randint(-obj[2], rq_feature.shape[2]-obj[2]-1)
+
+        rq_feature[obj[0], obj[1], obj[2]] -= 1
+        rq_feature[na, nb, nc] += 1
+
+    # random add object
+    a = np.random.choice(range(rq_feature.shape[0]), size=n_noise_object)
+    b = np.random.choice(range(rq_feature.shape[1]), size=n_noise_object)
+    c = np.random.choice(range(rq_feature.shape[2]), size=n_noise_object)
+    rq_feature[a, b, c] += 1
+
+    return rq_feature

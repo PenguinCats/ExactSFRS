@@ -9,15 +9,18 @@
 
 import random
 from data.args import args
-from data.city_data_preprocessor import CityDataPreprocessor
+from data.city_data import CityData
 from data.train_data_generator import TrainDataGenerator
+from data.test_effective_data_generator import TestEffectiveDataGenerator
 
 if __name__ == '__main__':
     # init
     random.seed(args.seed)
 
-    city_data = CityDataPreprocessor()
+    city_data = CityData()
 
     train_data = TrainDataGenerator(city_data)
+
+    test_effective_data = TestEffectiveDataGenerator(city_data)
 
     print("data generate done.")

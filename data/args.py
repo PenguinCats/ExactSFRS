@@ -41,5 +41,8 @@ class Args(object):
         self.negative_noise_rate = 0.5
         self.negative_shift_rate = 0.7
 
+        # test data setting
+        self.test_n_region = 2000
+
 
 args = Args()
