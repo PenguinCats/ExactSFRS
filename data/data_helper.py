@@ -42,7 +42,9 @@ def generate_r_positive(rq_feature):
     n_shift_object = int(total_objects * args.positive_shift_rate)
 
     a, b, c = np.where(rq_feature > 0)
-    coordinates = [[a[idx], b[idx], c[idx]]*rq_feature[a[idx]][b[idx]][c[idx]] for idx in range(len(a))]
+    coordinates = [[a[idx], b[idx], c[idx]]
+                   for idx in range(len(a))
+                   for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
     # random delete object
     objects_to_delete = random.sample(coordinates, n_noise_object)
 

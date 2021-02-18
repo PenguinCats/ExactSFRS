@@ -8,34 +8,36 @@
 """
 
 import random
-from tqdm import tqdm
+import torch
 import numpy as np
-from data_helper import is_intersect, generate_r_positive
+from data.data_helper import is_intersect, generate_r_positive
 from args import args
 
 
 class TrainDataGenerator(object):
     def __init__(self, city_data):
         self.city_data = city_data
-        self.training_tuples, self.training_coordinates = self.generate_tuples()
+        self.generate_tuples()
 
-    def generate_tuples(self):
-        training_tuples = []
+    def generate_tuples(self, batch_size=64):
+        training_tuples = [[], [], []]
         training_coordinates = []
 
         # a region is represented by a point (x, y) which is the upper-left block index and the length/height
-        for _ in tqdm(range(args.train_n_tuples)):
+        for _ in range(batch_size):
             # 生成区域
             rq_feature, rq_coordinate = self.city_data.generate_region()
 
             # 生成正负样例
-            r_pos = generate_r_positive(rq_feature)
+            r_pos = generate_r_positive(rq_feature.copy())
             if np.random.rand() > args.hard_example_rate:
                 r_neg = self.generate_r_negative_simple(rq_coordinate)
             else:
-                r_neg = self.generate_r_negative_hard(rq_feature)
+                r_neg = self.generate_r_negative_hard(rq_feature.copy())
 
-            training_tuples.append([rq_feature, r_pos, r_neg])
+            training_tuples[0].append(torch.tensor(rq_feature))
+            training_tuples[1].append(torch.tensor(r_pos))
+            training_tuples[2].append(torch.tensor(r_neg))
             training_coordinates.append(rq_coordinate)
 
         return training_tuples, training_coordinates
@@ -47,7 +49,14 @@ class TrainDataGenerator(object):
         n_shift_object = int(total_objects * args.negative_shift_rate)
 
         a, b, c = np.where(rq_feature > 0)
-        coordinates = [[a[idx], b[idx], c[idx]]*rq_feature[a[idx]][b[idx]][c[idx]] for idx in range(len(a))]
+        coordinates = [[a[idx], b[idx], c[idx]]
+                       for idx in range(len(a))
+                       for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
+
+        if len(coordinates) != total_objects:
+            print(len(coordinates), total_objects)
+            ea, _, _ = np.where(rq_feature < 0)
+            print(len(ea))
 
         # random delete object
         objects_to_delete = random.sample(coordinates, n_noise_object)
@@ -57,9 +66,9 @@ class TrainDataGenerator(object):
         # random shift object
         objects_to_shift = random.sample(coordinates, n_shift_object)
         for obj in objects_to_shift:
-            na = np.random.randint(-obj[0], rq_feature.shape[0]-obj[0]-1)
-            nb = np.random.randint(-obj[1], rq_feature.shape[1]-obj[1]-1)
-            nc = np.random.randint(-obj[2], rq_feature.shape[2]-obj[2]-1)
+            na = np.random.randint(-obj[0], rq_feature.shape[0] - obj[0] - 1)
+            nb = np.random.randint(-obj[1], rq_feature.shape[1] - obj[1] - 1)
+            nc = np.random.randint(-obj[2], rq_feature.shape[2] - obj[2] - 1)
 
             rq_feature[obj[0], obj[1], obj[2]] -= 1
             rq_feature[na, nb, nc] += 1

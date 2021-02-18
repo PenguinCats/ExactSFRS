@@ -7,15 +7,6 @@
 @Desc    :  None
 """
 
-# !/usr/bin/python
-# -*- coding: utf-8 -*-
-"""
-@File    :  args.py
-@Time    :  2021/2/6 0006 11:19
-@Author  :  Binjie Zhang (bj_zhang@seu.edu.cn)
-@Desc    :  None
-"""
-
 
 class Args(object):
     def __init__(self):
@@ -24,8 +15,8 @@ class Args(object):
         self.seed = 19981125
 
         # path
-        self.raw_data_dir = "./dataset/raw/"
-        self.preprocessed_data_dir = "./dataset/preprocessed/"
+        self.raw_data_dir = "data/dataset/raw/"
+        self.preprocessed_data_dir = "data/dataset/preprocessed/"
 
         # train data setting
         self.city_for_generate_train = "nanjing"
@@ -41,8 +32,18 @@ class Args(object):
         self.negative_noise_rate = 0.5
         self.negative_shift_rate = 0.7
 
+        self.training_data_generation_batch = 64
+
         # test data setting
         self.test_n_region = 2000
+
+        # model setting
+        self.filter_size = [11, 9, 7]
+        self.feature_dim = [16, 128, 64, 32]
+        self.stride = [2, 2, 2]
+        self.dropout_rate = 0.1
+        self.delta = 0.3
+        self.weight_decay = 0.00005
 
 
 args = Args()
