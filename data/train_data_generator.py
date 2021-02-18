@@ -35,9 +35,9 @@ class TrainDataGenerator(object):
             else:
                 r_neg = self.generate_r_negative_hard(rq_feature.copy())
 
-            training_tuples[0].append(torch.tensor(rq_feature))
-            training_tuples[1].append(torch.tensor(r_pos))
-            training_tuples[2].append(torch.tensor(r_neg))
+            training_tuples[0].append(torch.Tensor(rq_feature))
+            training_tuples[1].append(torch.Tensor(r_pos))
+            training_tuples[2].append(torch.Tensor(r_neg))
             training_coordinates.append(rq_coordinate)
 
         return training_tuples, training_coordinates
@@ -52,11 +52,6 @@ class TrainDataGenerator(object):
         coordinates = [[a[idx], b[idx], c[idx]]
                        for idx in range(len(a))
                        for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
-
-        if len(coordinates) != total_objects:
-            print(len(coordinates), total_objects)
-            ea, _, _ = np.where(rq_feature < 0)
-            print(len(ea))
 
         # random delete object
         objects_to_delete = random.sample(coordinates, n_noise_object)

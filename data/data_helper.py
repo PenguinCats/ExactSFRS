@@ -47,7 +47,6 @@ def generate_r_positive(rq_feature):
                    for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
     # random delete object
     objects_to_delete = random.sample(coordinates, n_noise_object)
-
     for obj in objects_to_delete:
         rq_feature[obj[0], obj[1], obj[2]] -= 1
 
