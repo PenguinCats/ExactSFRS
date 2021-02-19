@@ -26,7 +26,7 @@ class TrainDataGenerator(object):
         # a region is represented by a point (x, y) which is the upper-left block index and the length/height
         for _ in range(batch_size):
             # 生成区域
-            rq_feature, rq_coordinate = self.city_data.generate_region()
+            rq_feature, rq_coordinate = self.city_data.generate_region(copy=False)
 
             # 生成正负样例
             r_pos = generate_r_positive(rq_feature.copy())
@@ -53,6 +53,10 @@ class TrainDataGenerator(object):
                        for idx in range(len(a))
                        for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
 
+        if total_objects != len(coordinates):
+            print(total_objects, len(coordinates))
+            exit(0)
+
         # random delete object
         objects_to_delete = random.sample(coordinates, n_noise_object)
         for obj in objects_to_delete:
@@ -78,7 +82,7 @@ class TrainDataGenerator(object):
 
     def generate_r_negative_simple(self, rq_coordinate):
         while True:
-            r_neg, r_neg_coordinate = self.city_data.generate_region()
+            r_neg, r_neg_coordinate = self.city_data.generate_region(copy=False)
 
             if is_intersect(rq_coordinate, r_neg_coordinate):
                 continue

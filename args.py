@@ -17,6 +17,8 @@ class Args(object):
         # path
         self.raw_data_dir = "data/dataset/raw/"
         self.preprocessed_data_dir = "data/dataset/preprocessed/"
+        self.trained_model = "trained_model/"
+        self.log_dir = "trained_model/"
 
         # train data setting
         self.city_for_generate_train = "nanjing"
@@ -34,8 +36,14 @@ class Args(object):
 
         self.training_data_generation_batch = 64
 
+        # evaluate setting
+        self.evaluate_gap = 15
+        self.evaluate_n_region = 50
+        self.K = 10
+
         # test data setting
         self.test_n_region = 2000
+        self.K = 10
 
         # model setting
         self.filter_size = [11, 9, 7]
