@@ -29,7 +29,8 @@ warnings.filterwarnings("ignore")
 if __name__ == '__main__':
     # init
     random.seed(args.seed)
-    log_tool_init(folder=args.log_dir, no_console=False)
+    log_tool_init(folder=args.train_log_dir, no_console=False)
+    logging.info(' -- '.join(['%s:%s' % item for item in args.__dict__.items()]))
 
     # load data
     logging.info("loading city data...")
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     # data generator
     logging.info("building data generator...")
     train_data_generator = TrainDataGenerator(city_data)
-    evaluate_data_generator = TestEffectiveDataGenerator(city_data)
+    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.evaluate_n_region)
 
     # model
     logging.info("building model...")
@@ -111,10 +112,10 @@ if __name__ == '__main__':
     plt.ylabel("metrics")
     plt.plot(range(len(hr_list)), hr_list, color='red', label='HR@{}'.format(args.K), linestyle='-')
     plt.plot(range(len(mrr_list)), mrr_list, color='blue', label='MRR'.format(args.K), linestyle='-.')
-    plt.savefig(os.path.join(args.trained_model,
+    plt.savefig(os.path.join(args.trained_model_dir,
                              'train_result_{}.png'.format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
     plt.show()
 
     # save model
     torch.save(triplet,
-               os.path.join(args.trained_model, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
+               os.path.join(args.trained_model_dir, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))

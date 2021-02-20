@@ -13,15 +13,15 @@ from data.data_helper import generate_r_positive, is_intersect
 
 
 class TestEffectiveDataGenerator(object):
-    def __init__(self, city_data):
+    def __init__(self, city_data, test_cnt=args.test_n_region):
         self.city_data = city_data
-        self.regions, self.coordinates = self.generate_query_regions()
+        self.regions, self.coordinates = self.generate_query_regions(test_cnt)
         self.pos_set, self.neg_set_idx = self.generate_test_set()
 
-    def generate_query_regions(self):
+    def generate_query_regions(self, test_cnt):
         regions = []
         coordinates = []
-        for _ in range(args.test_n_region):
+        for _ in range(test_cnt):
             rq_feature, rq_coordinate = self.city_data.generate_region(copy=False)
             regions.append(rq_feature)
             coordinates.append(rq_coordinate)
