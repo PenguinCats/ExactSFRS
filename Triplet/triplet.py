@@ -24,10 +24,13 @@ class Triplet(nn.Module):
 
         self.Net.add_module("dropout", nn.Dropout(p=args.dropout_rate))
 
-        self.global_max_pooling = nn.AdaptiveMaxPool2d(1)
-
     def forward(self, data):
         data = self.Net(data.unsqueeze(0))
-        data = self.global_max_pooling(data).squeeze()
         return data
 
+
+_global_max_pooling_worker = nn.AdaptiveMaxPool2d(1)
+
+
+def global_max_pooling(data):
+    return _global_max_pooling_worker(data).squeeze()

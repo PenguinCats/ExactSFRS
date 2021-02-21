@@ -20,7 +20,7 @@ from log_helper import log_tool_init, logging
 from data.city_data import CityData
 from data.train_data_generator import TrainDataGenerator
 from data.test_effective_data_generator import TestEffectiveDataGenerator
-from Triplet.triplet import Triplet
+from Triplet.triplet import Triplet, global_max_pooling
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -58,9 +58,9 @@ if __name__ == '__main__':
         optimizer.zero_grad()
 
         (rq, pos, neg), _ = train_data_generator.generate_tuples(batch_size=args.training_data_generation_batch)
-        v_rq = torch.stack([triplet(single_tuple) for single_tuple in rq])
-        v_pos = torch.stack([triplet(single_tuple) for single_tuple in pos])
-        v_neg = torch.stack([triplet(single_tuple) for single_tuple in neg])
+        v_rq = torch.stack([global_max_pooling(triplet(single_tuple)) for single_tuple in rq])
+        v_pos = torch.stack([global_max_pooling(triplet(single_tuple)) for single_tuple in pos])
+        v_neg = torch.stack([global_max_pooling(triplet(single_tuple)) for single_tuple in neg])
 
         dis_pos = torch.sum(nn.functional.mse_loss(v_rq, v_pos, reduction='none'), dim=1)
         dis_neg = torch.sum(nn.functional.mse_loss(v_rq, v_neg, reduction='none'), dim=1)
@@ -80,8 +80,9 @@ if __name__ == '__main__':
                 hr_item = []
                 mrr_item = []
 
-                v_region = torch.stack([triplet(torch.Tensor(r)) for r in evaluate_data_generator.regions])
-                v_pos = torch.stack([triplet(r) for r in evaluate_data_generator.pos_set])
+                v_region = torch.stack([global_max_pooling(triplet(torch.Tensor(r)))
+                                        for r in evaluate_data_generator.regions])
+                v_pos = torch.stack([global_max_pooling(triplet(r)) for r in evaluate_data_generator.pos_set])
 
                 dis_pos = torch.sum(nn.functional.mse_loss(v_region, v_pos, reduction='none'), dim=1)
 

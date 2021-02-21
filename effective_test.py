@@ -18,6 +18,7 @@ from args import args
 from log_helper import log_tool_init, logging
 from data.city_data import CityData
 from data.test_effective_data_generator import TestEffectiveDataGenerator
+from Triplet.triplet import global_max_pooling
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -46,8 +47,8 @@ if __name__ == '__main__':
         hr_item = []
         mrr_item = []
 
-        v_region = torch.stack([model(torch.Tensor(r)) for r in evaluate_data_generator.regions])
-        v_pos = torch.stack([model(r) for r in evaluate_data_generator.pos_set])
+        v_region = torch.stack([global_max_pooling(model(torch.Tensor(r))) for r in evaluate_data_generator.regions])
+        v_pos = torch.stack([global_max_pooling(model(r)) for r in evaluate_data_generator.pos_set])
 
         dis_pos = torch.sum(nn.functional.mse_loss(v_region, v_pos, reduction='none'), dim=1)
 

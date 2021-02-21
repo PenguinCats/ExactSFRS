@@ -47,6 +47,9 @@ class Args(object):
         self.K = 10
         self.test_model_name = "2021-02-19_22-23-25"
 
+        # search setting
+        self.N = 10
+
         # model setting
         self.filter_size = [11, 9, 7]
         self.feature_dim = [16, 128, 64, 32]
