@@ -20,6 +20,7 @@ class Args(object):
         self.trained_model_dir = "trained_model/"
         self.train_log_dir = "trained_model/"
         self.test_effective_dir = "test/effective_test/"
+        self.test_efficient_dir = "test/efficient_test/"
 
         # train data setting
         self.city_for_generate_train = "nanjing"

@@ -7,7 +7,6 @@
 @Desc    :  None
 """
 
-import torch
 from args import args
 
 

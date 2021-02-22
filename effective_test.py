@@ -42,6 +42,7 @@ if __name__ == '__main__':
     model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_model_name)))
 
     # test
+    logging.info("testing...")
     model.eval()
     with torch.no_grad():
         hr_item = []
@@ -67,5 +68,5 @@ if __name__ == '__main__':
     num_list = [np.mean(hr_item), np.mean(mrr_item)]
     plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
     plt.savefig(os.path.join(args.test_effective_dir,
-                             'train_result_{}.png'.format(args.test_model_name)))
+                             'test_effective_result_{}.png'.format(args.test_model_name)))
     plt.show()
