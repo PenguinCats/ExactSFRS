@@ -38,14 +38,16 @@ class Args(object):
 
         self.training_data_generation_batch = 16
 
+        # metric setting
+        self.K = 10
+
         # evaluate setting
         self.evaluate_gap = 15
         self.evaluate_n_region = 50
-        self.K = 10
 
         # test data setting
-        self.test_n_region = 2000
-        self.K = 10
+        self.test_effective_region = 2000
+        self.test_efficient_region = 200
         self.test_model_name = "2021-02-19_22-23-25"
 
         # search setting

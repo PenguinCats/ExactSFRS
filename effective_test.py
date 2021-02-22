@@ -35,14 +35,14 @@ if __name__ == '__main__':
 
     # test generator
     logging.info("building test data generator...")
-    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.test_n_region)
+    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.test_effective_region)
 
     # reload model
     logging.info("reloading model...")
     model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_model_name)))
 
     # test
-    logging.info("testing...")
+    logging.info("testing effectiveness...")
     model.eval()
     with torch.no_grad():
         hr_item = []

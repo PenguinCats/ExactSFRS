@@ -35,14 +35,14 @@ if __name__ == '__main__':
 
     # test generator
     logging.info("building test data generator...")
-    evaluate_data_generator = TestEfficientDataGenerator(city_data, args.test_n_region)
+    evaluate_data_generator = TestEfficientDataGenerator(city_data, args.test_efficient_region)
 
     # reload model
     logging.info("reloading model...")
     model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_model_name)))
 
     # test
-    logging.info("testing...")
+    logging.info("testing efficiency...")
     model.eval()
     with torch.no_grad():
         search_space_feature = model(torch.Tensor(city_data.grid_feature))

@@ -11,7 +11,7 @@ from args import args
 
 
 class TestEfficientDataGenerator(object):
-    def __init__(self, city_data, test_cnt=args.test_n_region):
+    def __init__(self, city_data, test_cnt=args.test_effective_region):
         self.city_data = city_data
         self.regions, self.coordinates = self.generate_query_regions(test_cnt)
 
