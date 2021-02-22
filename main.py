@@ -14,9 +14,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from metrics import hit_ratio_at_K, MRR
+from tool.metrics import hit_ratio_at_K, MRR
 from args import args
-from log_helper import log_tool_init, logging
+from tool.log_helper import log_tool_init, logging
 from data.city_data import CityData
 from data.train_data_generator import TrainDataGenerator
 from data.test_effective_data_generator import TestEffectiveDataGenerator
@@ -113,6 +113,7 @@ if __name__ == '__main__':
     plt.ylabel("metrics")
     plt.plot(range(len(hr_list)), hr_list, color='red', label='HR@{}'.format(args.K), linestyle='-')
     plt.plot(range(len(mrr_list)), mrr_list, color='blue', label='MRR'.format(args.K), linestyle='-.')
+    plt.tight_layout()
     plt.savefig(os.path.join(args.trained_model_dir,
                              'train_result_{}.png'.format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
     plt.show()

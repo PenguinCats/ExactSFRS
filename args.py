@@ -48,7 +48,7 @@ class Args(object):
         # test data setting
         self.test_effective_region = 2000
         self.test_efficient_region = 200
-        self.test_model_name = "2021-02-19_22-23-25"
+        self.test_model_name = "2021-02-22_18-03-36"
 
         # search setting
         self.N = 10

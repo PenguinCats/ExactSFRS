@@ -79,3 +79,11 @@ class CityData(object):
                     return rq_feature.copy(), (lon_idx, lat_idx, length, height)
                 else:
                     return rq_feature, (lon_idx, lat_idx, length, height)
+
+    @staticmethod
+    def get_coordinate_by_index(lef, rig, bot, top):
+        lef_lon = args.city_range[0] + lef * args.grid_step[0]
+        rig_lon = args.city_range[0] + rig * args.grid_step[0]
+        bot_lat = args.city_range[3] + bot * args.grid_step[1]
+        top_lat = args.city_range[3] + top * args.grid_step[1]
+        return [[top_lat, lef_lon], [bot_lat, lef_lon], [bot_lat, rig_lon], [top_lat, rig_lon]]

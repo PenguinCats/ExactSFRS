@@ -15,10 +15,11 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from time import time
 from args import args
-from log_helper import log_tool_init, logging
+from tool.log_helper import log_tool_init, logging
 from data.city_data import CityData
 from data.test_efficient_data_generator import TestEfficientDataGenerator
 from ExactSFRS.exact_sfrs import ExactSFRS
+from tool.draw_map import draw_search_result_by_search_result
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -26,7 +27,7 @@ warnings.filterwarnings("ignore")
 if __name__ == '__main__':
     # init
     random.seed(args.seed)
-    log_tool_init(folder=args.test_effective_dir, no_console=False)
+    log_tool_init(folder=args.test_efficient_dir, no_console=False)
     logging.info(' -- '.join(['%s:%s' % item for item in args.__dict__.items()]))
 
     # load data
@@ -58,16 +59,29 @@ if __name__ == '__main__':
             single_search_time_consume = single_search_finish_time - single_search_start_time
             time_consume.append(single_search_time_consume)
 
-        # draw train result
-        plt.figure()
-        plt.subplot(1, 2, 1)
-        plt.xlabel("query ID")
-        plt.ylabel("single query runtime")
-        plt.plot(range(len(time_consume)), time_consume)
-        plt.subplot(1, 2, 2)
-        plt.xlabel("Exact SFRS")
-        plt.ylabel("average runtime")
-        plt.bar(["Exact SFRS"], np.mean(time_consume))
-        plt.savefig(os.path.join(args.test_efficient_dir,
-                                 'test_efficient_result_{}.png'.format(args.test_model_name)))
-        plt.show()
+            # draw map
+            if idx < 10:
+                rc = evaluate_data_generator.coordinates[idx]
+                region_coordinate = city_data.get_coordinate_by_index(rc[0], rc[0] + rc[2], rc[1], rc[1] + rc[3])
+                search_result_coordinates = [city_data.get_coordinate_by_index(v[0], v[1], v[2], v[3]) for v in search_result]
+                html = draw_search_result_by_search_result(region_coordinate, search_result_coordinates)
+                with open(os.path.join(args.test_efficient_dir,
+                                       'test_efficient_result_{}_{}.html'.format(args.test_model_name, idx)), 'w') as f:
+                    f.write(html)
+
+    logging.info(search_result)
+
+    # draw train result
+    plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.xlabel("query ID")
+    plt.ylabel("single query runtime")
+    plt.plot(range(len(time_consume)), time_consume)
+    plt.subplot(1, 2, 2)
+    plt.xlabel("Exact SFRS")
+    plt.ylabel("average runtime")
+    plt.bar(["Exact SFRS"], np.mean(time_consume))
+    plt.tight_layout()
+    plt.savefig(os.path.join(args.test_efficient_dir,
+                             'test_efficient_result_{}.png'.format(args.test_model_name)))
+    plt.show()

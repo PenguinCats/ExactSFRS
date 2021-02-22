@@ -13,9 +13,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from metrics import hit_ratio_at_K, MRR
+from tool.metrics import hit_ratio_at_K, MRR
 from args import args
-from log_helper import log_tool_init, logging
+from tool.log_helper import log_tool_init, logging
 from data.city_data import CityData
 from data.test_effective_data_generator import TestEffectiveDataGenerator
 from Triplet.triplet import global_max_pooling
@@ -67,6 +67,7 @@ if __name__ == '__main__':
     name_list = ['HR@'.format(args.K), 'MRR']
     num_list = [np.mean(hr_item), np.mean(mrr_item)]
     plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
+    plt.tight_layout()
     plt.savefig(os.path.join(args.test_effective_dir,
                              'test_effective_result_{}.png'.format(args.test_model_name)))
     plt.show()

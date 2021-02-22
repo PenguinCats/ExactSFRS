@@ -85,6 +85,18 @@ class _SpaceSet(object):
         return not self.too_small(width, height) and not self.too_big(width, height)
 
 
+def cal_origin_index(lef, rig, bot, top):
+    # 计算特征图上的坐标对应原图坐标.显而易见会有数个格子的误差,不过考虑到格子较小,可以容忍
+    i = len(args.filter_size) - 1
+    while i >= 0:
+        lef = lef * args.stride[i]
+        rig = rig * args.stride[i]
+        bot = bot * args.stride[i]
+        top = top * args.stride[i]
+        i -= 1
+    return [lef, rig, bot, top]
+
+
 class ExactSFRS(object):
     def __init__(self, search_space_feature):
         self.feature = search_space_feature
@@ -104,9 +116,10 @@ class ExactSFRS(object):
             while q.not_empty:
                 val, space_set = q.get()
 
+                # TODO 预测的区域不重叠
                 if space_set.has_unique_region():
                     if space_set.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
-                        ans.append((val, space_set))
+                        ans.append(cal_origin_index(space_set.l_min, space_set.r_min, space_set.b_min, space_set.t_min))
                     if len(ans) == args.N:
                         return ans
 
@@ -115,8 +128,8 @@ class ExactSFRS(object):
 
                     if sub_region_a.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
                         v_a_union = global_max_pooling(self.feature[:, :,
-                                                       sub_region_a.b_min:sub_region_a.t_max + 1,
-                                                       sub_region_a.l_min:sub_region_a.r_max + 1])
+                                                       sub_region_a.b_min:sub_region_a.t_max+1,
+                                                       sub_region_a.l_min:sub_region_a.r_max+1])
                         if sub_region_a.has_intersection():
                             v_a_intersection = global_max_pooling(self.feature[:, :,
                                                                                sub_region_a.b_max+1:sub_region_a.t_min,
@@ -128,8 +141,8 @@ class ExactSFRS(object):
 
                     if sub_region_b.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
                         v_b_union = global_max_pooling(self.feature[:, :,
-                                                                    sub_region_b.b_min+1:sub_region_b.t_max,
-                                                                    sub_region_b.l_min+1:sub_region_b.r_max])
+                                                                    sub_region_b.b_min:sub_region_b.t_max+1,
+                                                                    sub_region_b.l_min:sub_region_b.r_max+1])
                         if sub_region_b.has_intersection():
                             v_b_intersection = global_max_pooling(self.feature[:, :,
                                                                                sub_region_b.b_max+1:sub_region_b.t_min,
