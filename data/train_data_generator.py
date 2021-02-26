@@ -42,11 +42,20 @@ class TrainDataGenerator(object):
 
         return training_tuples, training_coordinates
 
+    def generate_r_negative_simple(self, rq_coordinate):
+        while True:
+            r_neg, r_neg_coordinate = self.city_data.generate_region(copy=False)
+
+            if is_intersect(rq_coordinate, r_neg_coordinate):
+                continue
+            else:
+                return r_neg
+
     @staticmethod
-    def generate_r_negative_hard(rq_feature):
+    def generate_r_negative_hard(rq_f):
+        rq_feature = rq_f.copy()
         total_objects = np.sum(rq_feature)
         n_noise_object = int(total_objects * args.negative_noise_rate)
-        n_shift_object = int(total_objects * args.negative_shift_rate)
 
         a, b, c = np.where(rq_feature > 0)
         coordinates = [[a[idx], b[idx], c[idx]]
@@ -62,29 +71,24 @@ class TrainDataGenerator(object):
         for obj in objects_to_delete:
             rq_feature[obj[0], obj[1], obj[2]] -= 1
 
-        # random shift object
-        objects_to_shift = random.sample(coordinates, n_shift_object)
-        for obj in objects_to_shift:
-            na = np.random.randint(-obj[0], rq_feature.shape[0] - obj[0] - 1)
-            nb = np.random.randint(-obj[1], rq_feature.shape[1] - obj[1] - 1)
-            nc = np.random.randint(-obj[2], rq_feature.shape[2] - obj[2] - 1)
-
-            rq_feature[obj[0], obj[1], obj[2]] -= 1
-            rq_feature[na, nb, nc] += 1
-
         # random add object
         a = np.random.choice(range(rq_feature.shape[0]), size=n_noise_object)
         b = np.random.choice(range(rq_feature.shape[1]), size=n_noise_object)
         c = np.random.choice(range(rq_feature.shape[2]), size=n_noise_object)
         rq_feature[a, b, c] += 1
 
+        # random shift object
+        a, b, c = np.where(rq_feature > 0)
+        coordinates = [[a[idx], b[idx], c[idx]]
+                       for idx in range(len(a))
+                       for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
+        for obj in coordinates:
+            nb = np.random.randint(max(-obj[1], -args.negative_shift_grid),
+                                   min(rq_feature.shape[1] - obj[1] - 1, args.negative_shift_grid))
+            nc = np.random.randint(max(-obj[2], -args.negative_shift_grid),
+                                   min(rq_feature.shape[2] - obj[2] - 1, args.negative_shift_grid))
+
+            rq_feature[obj[0], obj[1], obj[2]] -= 1
+            rq_feature[obj[0], nb, nc] += 1
+
         return rq_feature
-
-    def generate_r_negative_simple(self, rq_coordinate):
-        while True:
-            r_neg, r_neg_coordinate = self.city_data.generate_region(copy=False)
-
-            if is_intersect(rq_coordinate, r_neg_coordinate):
-                continue
-            else:
-                return r_neg

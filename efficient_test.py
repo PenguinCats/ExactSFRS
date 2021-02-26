@@ -27,7 +27,7 @@ warnings.filterwarnings("ignore")
 if __name__ == '__main__':
     # init
     random.seed(args.seed)
-    log_tool_init(folder=args.test_efficient_dir, no_console=False)
+    log_tool_init(folder=args.test_efficient_dir, no_console=False, prefix='test_efficient')
     logging.info(' -- '.join(['%s:%s' % item for item in args.__dict__.items()]))
 
     # load data
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     # reload model
     logging.info("reloading model...")
-    model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_model_name)))
+    model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_efficient_model_name)))
 
     # test
     logging.info("testing efficiency...")
@@ -60,16 +60,17 @@ if __name__ == '__main__':
             time_consume.append(single_search_time_consume)
 
             # draw map
-            if idx < 10:
+            if idx < 20:
                 rc = evaluate_data_generator.coordinates[idx]
                 region_coordinate = city_data.get_coordinate_by_index(rc[0], rc[0] + rc[2], rc[1], rc[1] + rc[3])
-                search_result_coordinates = [city_data.get_coordinate_by_index(v[0], v[1], v[2], v[3]) for v in search_result]
+                search_result_coordinates = [city_data.get_coordinate_by_index(v[0], v[1], v[2], v[3])
+                                             for v in search_result]
                 html = draw_search_result_by_search_result(region_coordinate, search_result_coordinates)
                 with open(os.path.join(args.test_efficient_dir,
                                        'test_efficient_result_{}_{}.html'.format(args.test_model_name, idx)), 'w') as f:
                     f.write(html)
 
-    logging.info(search_result)
+            logging.info(search_result)
 
     # draw train result
     plt.figure()

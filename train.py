@@ -1,7 +1,7 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-@File    :  main.py
+@File    :  train.py
 @Time    :  2021/2/18 0018 16:42
 @Author  :  Binjie Zhang (bj_zhang@seu.edu.cn)
 @Desc    :  None
@@ -113,6 +113,7 @@ if __name__ == '__main__':
     plt.ylabel("metrics")
     plt.plot(range(len(hr_list)), hr_list, color='red', label='HR@{}'.format(args.K), linestyle='-')
     plt.plot(range(len(mrr_list)), mrr_list, color='blue', label='MRR'.format(args.K), linestyle='-.')
+    plt.legend(loc='lower right')
     plt.tight_layout()
     plt.savefig(os.path.join(args.trained_model_dir,
                              'train_result_{}.png'.format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
@@ -121,3 +122,5 @@ if __name__ == '__main__':
     # save model
     torch.save(triplet,
                os.path.join(args.trained_model_dir, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
+
+    logging.info(local_time)

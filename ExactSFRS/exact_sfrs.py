@@ -20,14 +20,15 @@ def _cal_distance(v1, v2):
 
 def _cal_bound(vq, v_union, v_intersection):
     # Tip: 个人认为文中的 k1, k2 定义中少了等号,即,这里应当使用 torch.le 和 torch.ge
+    # Tip: 我后来又发现没什么关系
 
-    # k2 = torch.lt(v_union, vq)
-    k2 = torch.le(v_union, vq)
+    k2 = torch.lt(v_union, vq)
+    # k2 = torch.le(v_union, vq)
     bound = torch.sum(torch.pow(vq[k2] - v_union[k2], 2))
 
     if v_intersection is not None:
-        # k1 = torch.gt(v_intersection, vq)
-        k1 = torch.ge(v_intersection, vq)
+        k1 = torch.gt(v_intersection, vq)
+        # k1 = torch.ge(v_intersection, vq)
         bound += torch.sum(torch.pow(vq[k1] - v_intersection[k1], 2))
 
     return bound
@@ -84,6 +85,21 @@ class _SpaceSet(object):
     def has_proper_size(self, width, height):
         return not self.too_small(width, height) and not self.too_big(width, height)
 
+    def is_overlap(self, oth):
+        if not self.has_unique_region() or not oth.has_unique_region():
+            print("error!")
+            exit(0)
+
+        # 此时，r_max == r_min。其余同理。
+        lon_max = min(self.r_max, oth.r_max)
+        lon_min = max(self.l_max, oth.l_max)
+        lat_max = min(self.t_max, oth.t_max)
+        lat_min = max(self.b_max, oth.b_max)
+        if lon_max < lon_min or lat_max < lat_min:
+            return False
+        else:
+            return True
+
 
 def cal_origin_index(lef, rig, bot, top):
     # 计算特征图上的坐标对应原图坐标.显而易见会有数个格子的误差,不过考虑到格子较小,可以容忍
@@ -100,8 +116,8 @@ def cal_origin_index(lef, rig, bot, top):
 class ExactSFRS(object):
     def __init__(self, search_space_feature):
         self.feature = search_space_feature
-        self.height = self.feature.shape[2]
-        self.width = self.feature.shape[3]
+        self.height = self.feature.shape[3]
+        self.width = self.feature.shape[2]
 
         self.space_set_p = _SpaceSet(0, 0, 0, 0, self.width - 1, self.width - 1, self.height - 1, self.height - 1)
 
@@ -109,6 +125,7 @@ class ExactSFRS(object):
         with torch.no_grad():
             target_feature_pooling = global_max_pooling(target_feature)
             ans = []
+            ans_space_set = []
 
             q = PriorityQueue()
             q.put((_cal_bound(target_feature_pooling, global_max_pooling(self.feature), None), self.space_set_p))
@@ -116,10 +133,12 @@ class ExactSFRS(object):
             while q.not_empty:
                 val, space_set = q.get()
 
-                # TODO 预测的区域不重叠
                 if space_set.has_unique_region():
                     if space_set.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
+                        # if any(space_set.is_overlap(ans_set) for ans_set in ans_space_set):
+                        #     continue
                         ans.append(cal_origin_index(space_set.l_min, space_set.r_min, space_set.b_min, space_set.t_min))
+                        # ans_space_set.append(space_set)
                     if len(ans) == args.N:
                         return ans
 
@@ -127,26 +146,43 @@ class ExactSFRS(object):
                     sub_region_a, sub_region_b = space_set.split()
 
                     if sub_region_a.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
+                        # v_a_union = global_max_pooling(self.feature[:, :,
+                        #                                sub_region_a.b_min:sub_region_a.t_max+1,
+                        #                                sub_region_a.l_min:sub_region_a.r_max+1])
                         v_a_union = global_max_pooling(self.feature[:, :,
-                                                       sub_region_a.b_min:sub_region_a.t_max+1,
-                                                       sub_region_a.l_min:sub_region_a.r_max+1])
+                                                       sub_region_a.l_min:sub_region_a.r_max + 1,
+                                                       sub_region_a.b_min:sub_region_a.t_max + 1])
                         if sub_region_a.has_intersection():
+                            # v_a_intersection = global_max_pooling(self.feature[:, :,
+                            #                                                    sub_region_a.b_max+1:sub_region_a.t_min,
+                            #                                                    sub_region_a.l_max+1:sub_region_a.r_min])
                             v_a_intersection = global_max_pooling(self.feature[:, :,
-                                                                               sub_region_a.b_max+1:sub_region_a.t_min,
-                                                                               sub_region_a.l_max+1:sub_region_a.r_min])
+                                                                  sub_region_a.l_max + 1:sub_region_a.r_min,
+                                                                  sub_region_a.b_max + 1:sub_region_a.t_min])
                             bound_a = _cal_bound(target_feature_pooling, v_a_union, v_a_intersection)
                         else:
                             bound_a = _cal_bound(target_feature_pooling, v_a_union, None)
                         q.put((bound_a, sub_region_a))
 
                     if sub_region_b.has_proper_size(target_feature.shape[3], target_feature.shape[2]):
+                        # v_b_union = global_max_pooling(self.feature[:, :,
+                        #                                             sub_region_b.b_min:sub_region_b.t_max+1,
+                        #                                             sub_region_b.l_min:sub_region_b.r_max+1])
+                        re = self.feature[:, :,
+                                                       sub_region_b.l_min:sub_region_b.r_max + 1,
+                                                       sub_region_b.b_min:sub_region_b.t_max + 1]
+                        if re.shape[3] == 0:
+                            print('err')
                         v_b_union = global_max_pooling(self.feature[:, :,
-                                                                    sub_region_b.b_min:sub_region_b.t_max+1,
-                                                                    sub_region_b.l_min:sub_region_b.r_max+1])
+                                                       sub_region_b.l_min:sub_region_b.r_max + 1,
+                                                       sub_region_b.b_min:sub_region_b.t_max + 1])
                         if sub_region_b.has_intersection():
+                            # v_b_intersection = global_max_pooling(self.feature[:, :,
+                            #                                                    sub_region_b.b_max+1:sub_region_b.t_min,
+                            #                                                    sub_region_b.l_max+1:sub_region_b.r_min])
                             v_b_intersection = global_max_pooling(self.feature[:, :,
-                                                                               sub_region_b.b_max+1:sub_region_b.t_min,
-                                                                               sub_region_b.l_max+1:sub_region_b.r_min])
+                                                                  sub_region_b.l_max + 1:sub_region_b.r_min,
+                                                                  sub_region_b.b_max + 1:sub_region_b.t_min])
                             bound_b = _cal_bound(target_feature_pooling, v_b_union, v_b_intersection)
                         else:
                             bound_b = _cal_bound(target_feature_pooling, v_b_union, None)

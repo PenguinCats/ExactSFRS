@@ -26,7 +26,7 @@ warnings.filterwarnings("ignore")
 if __name__ == '__main__':
     # init
     random.seed(args.seed)
-    log_tool_init(folder=args.test_effective_dir, no_console=False)
+    log_tool_init(folder=args.test_effective_dir, no_console=False, prefix='test_effective')
     logging.info(' -- '.join(['%s:%s' % item for item in args.__dict__.items()]))
 
     # load data
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     # reload model
     logging.info("reloading model...")
-    model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_model_name)))
+    model = torch.load(os.path.join(args.trained_model_dir, "model_{}.pkl".format(args.test_effective_model_name)))
 
     # test
     logging.info("testing effectiveness...")
@@ -64,10 +64,10 @@ if __name__ == '__main__':
     logging.info("HR@{}: {} | MRR: {}".format(args.K, np.mean(hr_item), np.mean(mrr_item)))
 
     # draw result
-    name_list = ['HR@'.format(args.K), 'MRR']
+    name_list = ["HR@".format(args.K), 'MRR']
     num_list = [np.mean(hr_item), np.mean(mrr_item)]
     plt.bar(range(len(num_list)), num_list, color='rgb', tick_label=name_list)
     plt.tight_layout()
     plt.savefig(os.path.join(args.test_effective_dir,
-                             'test_effective_result_{}.png'.format(args.test_model_name)))
+                             'test_effective_result_{}.png'.format(args.test_efficient_model_name)))
     plt.show()

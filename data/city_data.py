@@ -80,6 +80,13 @@ class CityData(object):
                 else:
                     return rq_feature, (lon_idx, lat_idx, length, height)
 
+    def get_region_feature_by_idx(self, lon_idx_1, lon_idx_2, lat_idx_1, lat_idx_2, copy=False):
+        region = self.grid_feature[:, lon_idx_1:lon_idx_2+1, lat_idx_1:lat_idx_2+1]
+        if copy:
+            return region.copy()
+        else:
+            return region
+
     @staticmethod
     def get_coordinate_by_index(lef, rig, bot, top):
         lef_lon = args.city_range[0] + lef * args.grid_step[0]
@@ -87,3 +94,11 @@ class CityData(object):
         bot_lat = args.city_range[3] + bot * args.grid_step[1]
         top_lat = args.city_range[3] + top * args.grid_step[1]
         return [[top_lat, lef_lon], [bot_lat, lef_lon], [bot_lat, rig_lon], [top_lat, rig_lon]]
+
+    @staticmethod
+    def get_index_by_coordinate(lon1, lat1, lon2, lat2):
+        lon_idx_1 = int((lon1 - args.city_range[0]) // (args.grid_step[0]))
+        lat_idx_1 = int((lat1 - args.city_range[3]) // (args.grid_step[1]))
+        lon_idx_2 = int((lon2 - args.city_range[0]) // (args.grid_step[0]))
+        lat_idx_2 = int((lat2 - args.city_range[3]) // (args.grid_step[1]))
+        return lon_idx_1, lon_idx_2, lat_idx_2, lat_idx_1

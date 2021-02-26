@@ -36,10 +36,10 @@ def is_intersect(rq_coordinate, r_neg_coordinate):
         return True
 
 
-def generate_r_positive(rq_feature):
+def generate_r_positive(rq_f):
+    rq_feature = rq_f.copy()
     total_objects = np.sum(rq_feature)
     n_noise_object = int(total_objects * args.positive_noise_rate)
-    n_shift_object = int(total_objects * args.positive_shift_rate)
 
     a, b, c = np.where(rq_feature > 0)
     coordinates = [[a[idx], b[idx], c[idx]]
@@ -55,20 +55,66 @@ def generate_r_positive(rq_feature):
     for obj in objects_to_delete:
         rq_feature[obj[0], obj[1], obj[2]] -= 1
 
-    # random shift object
-    objects_to_shift = random.sample(coordinates, n_shift_object)
-    for obj in objects_to_shift:
-        na = np.random.randint(-obj[0], rq_feature.shape[0]-obj[0]-1)
-        nb = np.random.randint(-obj[1], rq_feature.shape[1]-obj[1]-1)
-        nc = np.random.randint(-obj[2], rq_feature.shape[2]-obj[2]-1)
-
-        rq_feature[obj[0], obj[1], obj[2]] -= 1
-        rq_feature[na, nb, nc] += 1
-
     # random add object
     a = np.random.choice(range(rq_feature.shape[0]), size=n_noise_object)
     b = np.random.choice(range(rq_feature.shape[1]), size=n_noise_object)
     c = np.random.choice(range(rq_feature.shape[2]), size=n_noise_object)
     rq_feature[a, b, c] += 1
 
+    # random shift object
+    a, b, c = np.where(rq_feature > 0)
+    coordinates = [[a[idx], b[idx], c[idx]]
+                   for idx in range(len(a))
+                   for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
+    objects_to_shift = random.sample(coordinates, int(len(coordinates) * args.shift_n_ratio))
+    for obj in objects_to_shift:
+        nb = np.random.randint(max(-obj[1], -args.positive_shift_grid),
+                               min(rq_feature.shape[1]-obj[1]-1, args.positive_shift_grid))
+        nc = np.random.randint(max(-obj[2], -args.positive_shift_grid),
+                               min(rq_feature.shape[2] - obj[2] - 1, args.positive_shift_grid))
+
+        rq_feature[obj[0], obj[1], obj[2]] -= 1
+        rq_feature[obj[0], nb, nc] += 1
+
     return rq_feature
+
+# def generate_r_positive(rq_feature):
+#     total_objects = np.sum(rq_feature)
+#     n_noise_object = int(total_objects * args.positive_noise_rate)
+#
+#     a, b, c = np.where(rq_feature > 0)
+#     coordinates = [[a[idx], b[idx], c[idx]]
+#                    for idx in range(len(a))
+#                    for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
+#
+#     if total_objects != len(coordinates):
+#         print(total_objects, len(coordinates))
+#         exit(0)
+#
+#     # random delete object
+#     objects_to_delete = random.sample(coordinates, n_noise_object)
+#     for obj in objects_to_delete:
+#         rq_feature[obj[0], obj[1], obj[2]] -= 1
+#
+#     # random add object
+#     a = np.random.choice(range(rq_feature.shape[0]), size=n_noise_object)
+#     b = np.random.choice(range(rq_feature.shape[1]), size=n_noise_object)
+#     c = np.random.choice(range(rq_feature.shape[2]), size=n_noise_object)
+#     rq_feature[a, b, c] += 1
+#
+#     # random shift object
+#     a, b, c = np.where(rq_feature > 0)
+#     coordinates = [[a[idx], b[idx], c[idx]]
+#                    for idx in range(len(a))
+#                    for _ in range(rq_feature[a[idx]][b[idx]][c[idx]])]
+#     # n_shift_object = int(total_objects * args.positive_shift_rate)
+#     # objects_to_shift = random.sample(coordinates, n_shift_object)
+#     # print(n_shift_object / len(coordinates))
+#     for obj in coordinates:
+#         nb = np.random.randint(-obj[1], rq_feature.shape[1]-obj[1]-1)
+#         nc = np.random.randint(-obj[2], rq_feature.shape[2]-obj[2]-1)
+#
+#         rq_feature[obj[0], obj[1], obj[2]] -= 1
+#         rq_feature[obj[0], nb, nc] += 1
+#
+#     return rq_feature
