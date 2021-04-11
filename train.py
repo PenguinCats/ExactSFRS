@@ -27,6 +27,8 @@ warnings.filterwarnings("ignore")
 
 
 if __name__ == '__main__':
+    start_local_time = time.localtime()
+
     # init
     random.seed(args.seed)
     log_tool_init(folder=args.train_log_dir, no_console=False)
@@ -39,7 +41,7 @@ if __name__ == '__main__':
     # data generator
     logging.info("building data generator...")
     train_data_generator = TrainDataGenerator(city_data)
-    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.evaluate_n_region)
+    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.evaluate_n_region, args.evaluate_n_comparison)
 
     # model
     logging.info("building model...")
@@ -74,20 +76,22 @@ if __name__ == '__main__':
 
         # evaluate
         if epoch % args.evaluate_gap == 0:
-
             triplet.eval()
             with torch.no_grad():
                 hr_item = []
                 mrr_item = []
 
-                v_region = torch.stack([global_max_pooling(triplet(torch.Tensor(r)))
-                                        for r in evaluate_data_generator.regions])
+                v_all_region = torch.stack([global_max_pooling(triplet(torch.Tensor(r)))
+                                           for r in evaluate_data_generator.regions])
+
+                v_q_region = v_all_region[evaluate_data_generator.v_q_ids]
+
                 v_pos = torch.stack([global_max_pooling(triplet(r)) for r in evaluate_data_generator.pos_set])
 
-                dis_pos = torch.sum(nn.functional.mse_loss(v_region, v_pos, reduction='none'), dim=1)
+                dis_pos = torch.sum(nn.functional.mse_loss(v_q_region, v_pos, reduction='none'), dim=1)
 
-                for idx, v_rq in enumerate(v_region):
-                    dis_neg = torch.sum(nn.functional.mse_loss(v_rq, v_region[evaluate_data_generator.neg_set_idx[idx]],
+                for idx, v_rq in enumerate(v_q_region):
+                    dis_neg = torch.sum(nn.functional.mse_loss(v_rq, v_all_region[evaluate_data_generator.neg_set_idx[idx]],
                                                                reduction='none'), dim=1)
                     distances_total = torch.cat((dis_pos[idx].unsqueeze(0), dis_neg))
                     _, sorted_indices = torch.sort(distances_total, descending=False)
@@ -100,7 +104,19 @@ if __name__ == '__main__':
             logging.info('        Epoch {:03d} | HR {:.4f} | MRR {:.4f}'.format(epoch, np.mean(hr_item),
                                                                                 np.mean(mrr_item)))
 
-    local_time = time.localtime()
+    # save trained city feature
+    triplet.eval()
+    with torch.no_grad():
+        origin_g_feature = triplet(torch.Tensor(city_data.grid_feature))
+        torch.save(origin_g_feature,
+                   os.path.join(args.trained_model_dir,
+                                "city_feature_{}.pt".format(time.strftime("%m-%d_%H-%M", start_local_time))))
+
+    # save model
+    torch.save(triplet,
+               os.path.join(args.trained_model_dir, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M", start_local_time))))
+
+    logging.info(start_local_time)
 
     # draw train result
     plt.figure()
@@ -116,11 +132,5 @@ if __name__ == '__main__':
     plt.legend(loc='lower right')
     plt.tight_layout()
     plt.savefig(os.path.join(args.trained_model_dir,
-                             'train_result_{}.png'.format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
+                             'train_result_{}.png'.format(time.strftime("%Y-%m-%d_%H-%M", start_local_time))))
     plt.show()
-
-    # save model
-    torch.save(triplet,
-               os.path.join(args.trained_model_dir, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M-%S", local_time))))
-
-    logging.info(local_time)
