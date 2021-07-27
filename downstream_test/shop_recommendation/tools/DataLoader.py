@@ -100,7 +100,7 @@ class DataLoader:
     def load_dianping_data(self):
         big_category_dict, n_category = load_category()
         data_path = os.path.join(args.raw_data_dir, args.downstream_test_city + '.csv')
-        data = pd.read_csv(data_path, usecols=args.city_dianping_index_order)
+        data = pd.read_csv(data_path, usecols=args.city_data_index_order)
 
         # format data
         data = data[data['status'] == 0].drop(columns='status')

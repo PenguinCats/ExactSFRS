@@ -11,6 +11,7 @@ import os
 import random
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from args import args
 from data.data_helper import load_category
 
@@ -32,14 +33,18 @@ class CityData(object):
 
     @staticmethod
     def load_data():
-        big_category_dict, n_category = load_category()
-        data_path = os.path.join(args.raw_data_dir, args.city_for_generate_train + '.csv')
-        data = pd.read_csv(data_path, usecols=args.city_dianping_index_order)
+        data_path = os.path.join(args.raw_data_dir, args.city_for_generate_train + '_POI.csv')
+        data = pd.read_csv(data_path, usecols=args.city_data_index_order)
 
         # format data
-        data = data[data['status'] == 0].drop(columns='status')
-        data['category'] = data['big_category'].map(lambda x: big_category_dict[x])
-        data = data.drop(columns='big_category')
+        data = data[data['longitude'].notnull()]
+        data = data[data['latitude'].notnull()]
+
+        POI_label_encoder = LabelEncoder()
+        POI_label_encoder.fit(data['category'])
+        data['category'] = POI_label_encoder.transform(data['category'])
+
+        n_category = len(data['category'].unique())
 
         return data, n_category
 
@@ -71,14 +76,10 @@ class CityData(object):
             # 切片是左闭右开区间
             rq_feature = self.grid_feature[:, lon_idx:lon_idx+length, lat_idx:lat_idx+height]
 
-            if np.sum(rq_feature) < 50:
-                # 区域内 object 太少，重新选择区域
-                continue
+            if copy:
+                return rq_feature.copy(), (lon_idx, lat_idx, length, height)
             else:
-                if copy:
-                    return rq_feature.copy(), (lon_idx, lat_idx, length, height)
-                else:
-                    return rq_feature, (lon_idx, lat_idx, length, height)
+                return rq_feature, (lon_idx, lat_idx, length, height)
 
     def get_region_feature_by_idx(self, lon_idx_1, lon_idx_2, lat_idx_1, lat_idx_2, copy=False):
         region = self.grid_feature[:, lon_idx_1:lon_idx_2+1, lat_idx_1:lat_idx_2+1]

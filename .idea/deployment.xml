@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="Copy of project-level server '223.3.84.194'" remoteFilesAllowedToDisappearOnAutoupload="false" autoUploadExternalChanges="true">
+  <component name="PublishConfigData" autoUpload="Always" serverName="3090" remoteFilesAllowedToDisappearOnAutoupload="false" autoUploadExternalChanges="true">
     <serverData>
-      <paths name="Copy of project-level server '223.3.84.194'">
+      <paths name="3090">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/zhangbinjie/ExactSFRS" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/zhangbinjie/work/ExactSFRS" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@223.3.84.194:1022 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhangbinjie@223.3.84.194:1022">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zhangbinjie/work/ExactSFRS" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

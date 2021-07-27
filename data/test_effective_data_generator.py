@@ -14,9 +14,10 @@ from data.data_helper import generate_r_positive, is_intersect
 
 
 class TestEffectiveDataGenerator(object):
-    def __init__(self, city_data, test_cnt=args.test_effective_region, test_comparisons_cnt=args.test_n_comparison):
+    def __init__(self, city_data, test_cnt, neg_cnt, total_region_cnt=args.test_n_comparison):
         self.test_cnt = test_cnt
-        self.test_comparisons_cnt = test_comparisons_cnt
+        self.neg_cnt = neg_cnt
+        self.total_region_cnt = total_region_cnt
         self.city_data = city_data
         self.regions, self.coordinates = self.generate_query_regions()
         self.v_q_ids, self.pos_set, self.neg_set_idx = self.generate_test_set()
@@ -24,7 +25,7 @@ class TestEffectiveDataGenerator(object):
     def generate_query_regions(self):
         regions = []
         coordinates = []
-        for _ in range(self.test_comparisons_cnt):
+        for _ in range(self.total_region_cnt):
             rq_feature, rq_coordinate = self.city_data.generate_region(copy=False)
             regions.append(rq_feature)
             coordinates.append(rq_coordinate)
@@ -45,15 +46,7 @@ class TestEffectiveDataGenerator(object):
             pos_set.append(torch.Tensor(r_pos))
 
             # negative samples
-            test_item_idx = []
-            for k2, v2 in enumerate(self.regions):
-                if k1 == k2:
-                    continue
-                if is_intersect(self.coordinates[k1], self.coordinates[k2]):
-                    continue
-
-                test_item_idx.append(k2)
-
+            test_item_idx = random.sample(candidate_ids, self.neg_cnt)
             neg_set_idx.append(test_item_idx)
 
         return v_q_ids, pos_set, neg_set_idx

@@ -41,7 +41,8 @@ if __name__ == '__main__':
     # data generator
     logging.info("building data generator...")
     train_data_generator = TrainDataGenerator(city_data)
-    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.evaluate_n_region, args.evaluate_n_comparison)
+    evaluate_data_generator = TestEffectiveDataGenerator(city_data, args.evaluate_n_region,
+                                                         args.evaluate_n_neg, args.evaluate_n_total_region)
 
     # model
     logging.info("building model...")

@@ -24,21 +24,19 @@ class Args(object):
         self.test_search_dir = "test/search_test/"
 
         # train data setting
-        self.city_for_generate_train = "nanjing"
-        self.city_range = [118.740693, 32.091769, 118.830456, 31.965555]
-        self.tencent_city_gps_range = [118.740693, 118.830456, 31.965555, 32.091769]
-        self.grid_step = [0.0001, 0.0001]  # City size via lon&lat step, 大约对应南京的 10m * 10m
-        self.city_dianping_index_order = [1, 2, 14, 17, 18, 11]
+        self.city_for_generate_train = "NYC"
+        self.city_range = [-74.0096368441688, 40.76276709553161, -73.84843113758568, 40.60648987398893]
+        self.grid_step = [0.0001, 0.0001]  # City size via lon&lat step
+        self.city_data_index_order = [2, 3, 13]
 
         self.train_n_tuples = 20000
         self.train_area_size_range = [60, 200]  # region 大约对应多少个格子的范围
         self.shift_n_ratio = 0.5
-        self.positive_noise_rate = 0.1
+        self.positive_noise_rate = 0.15
         self.positive_shift_grid = 5
-        self.hard_example_rate = 0.1
-        self.negative_noise_rate = 0.5
-        # self.negative_shift_rate = 0.5
-        self.negative_shift_grid = 20
+        self.hard_example_rate = 0.4
+        self.negative_noise_rate = 0.35
+        self.negative_shift_grid = 10
 
         self.training_data_generation_batch = 16
 
@@ -48,15 +46,17 @@ class Args(object):
         # evaluate setting
         self.evaluate_gap = 100
         self.evaluate_n_region = 50
-        self.evaluate_n_comparison = 2048
+        self.evaluate_n_neg = 100
+        self.evaluate_n_total_region = 2048
 
         # effective test setting
         self.test_effective_region = 2000
+        self.test_n_comparison = 2048
         self.test_effective_model_name = "04-10_20-53"
 
         # efficient test setting
         self.test_efficient_region = 100
-        self.test_n_comparison = 2048
+
         self.test_efficient_model_name = "04-10_20-53"
 
         # search test setting
@@ -73,9 +73,9 @@ class Args(object):
         self.N = 10
 
         # model setting
-        self.filter_size = [11, 9, 7]
-        self.feature_dim = [16, 128, 64, 32]
-        self.stride = [2, 2, 2]
+        self.filter_size = [5, 3]
+        self.feature_dim = [92, 64, 32]
+        self.stride = [2, 2]
         self.dropout_rate = 0.1
         self.delta = 0.3
         self.weight_decay = 0.00005
