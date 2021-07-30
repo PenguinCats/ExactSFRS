@@ -7,7 +7,7 @@
         <remote-mappings server-id="python@sftp://zhangbinjie@223.3.84.194:3022/usr/local/anaconda3/envs/pytorch_1.8.1/bin/python">
           <settings>
             <list>
-              <mapping local-root="$PROJECT_DIR$" remote-root="/home/zhangbinjie/work/ExactSFRS" />
+              <mapping local-root="$PROJECT_DIR$" remote-root="/home/zhangbinjie/tangjunWorkSpace/ExactSFRS" />
             </list>
           </settings>
         </remote-mappings>

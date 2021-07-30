@@ -80,6 +80,9 @@ if __name__ == '__main__':
         model.train()
         for bd in train_dl:
             iter_inner_cnt += 1
+            print(bd[0][0].squeeze(0).size())
+            print(type(bd[0][0]))
+
             bd[0][0] = bd[0][0].squeeze(0)
             bd[0][1] = bd[0][1].squeeze(0)
             bd[0][2] = bd[0][2].squeeze(0)
@@ -87,7 +90,6 @@ if __name__ == '__main__':
             pos_lon_idx, pos_lat_idx = bd[2], bd[3]
             neg_lon_idx, neg_lat_idx = bd[4], bd[5]
             lon_len, lat_len = bd[6], bd[7]
-
             v_rq = bd[0][0][pos_lon_idx: pos_lon_idx + lon_len,  pos_lat_idx: pos_lat_idx + lat_len].to(DEVICE)
             v_pos = bd[0][1][pos_lon_idx: pos_lon_idx + lon_len,  pos_lat_idx: pos_lat_idx + lat_len].to(DEVICE)
             if neg_lon_idx < 0:
@@ -134,6 +136,7 @@ if __name__ == '__main__':
             mrr_epoch_item = []
 
             for tbd in test_dl:
+                # print(tbd)
                 pos_lon_idx, pos_lat_idx = tbd[2], tbd[3]
                 lon_len, lat_len = tbd[6], tbd[7]
 

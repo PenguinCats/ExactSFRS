@@ -44,9 +44,11 @@ class ExperimentArgs:
             [-73.94832596036136, 40.65413946909123],
             [-73.91635682499665, 40.615842047192146],
             [-73.99623167386585, 40.744621740014885]]
-        self.rwt_selected_feature = [['购物'], ['住宅区', '医疗'], ['住宅区', '购物', '学校', '公园景点'], ['办公区', '交通']]
-        self.rwt_concern_checkin = [False, False, False, False]
-        self.rwt_dg_length_and_width = [2, 2]
+        # self.rwt_selected_feature = [['餐饮'], ['餐饮'], ['餐饮'], ['餐饮'], ['餐饮'], ['餐饮', '购物'], ['购物']]
+        # self.rwt_concern_checkin = [True, True, True, True, True, True, True]
+        self.rwt_selected_feature = [['医疗', '购物'], ['餐饮'], ['便民服务'], ['医疗', '购物'], ['住宅区']]
+        self.rwt_concern_checkin = [True, True, False, True, False]
+        self.rwt_dg_length_and_width = [10, 10]
         self.rwt_model_start_time = [2, 2]
         self.rwt_model_start_time = "2021-07-18_23-13"
 

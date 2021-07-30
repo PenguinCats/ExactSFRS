@@ -415,3 +415,49 @@ class TestDataSet(ForModifyDataSet):
 
     def __len__(self):
         return self._size
+
+
+class RealWorldDataSet(BaseDataSet):
+    def __init__(self, city_base_info, size, city_feature_path, exp_args):
+        super().__init__(city_base_info, size, city_feature_path, exp_args)
+
+        self.lon_start_list = []
+        self.lat_start_list = []
+        for i in range(0, self.n_lon_len, exp_args.rwt_dg_length_and_width[0]):
+            if self.n_lon_len - i < exp_args.rwt_dg_length_and_width[0]:
+                continue
+            for j in range(0, self.n_lat_len, exp_args.rwt_dg_length_and_width[1]):
+                if self.n_lat_len - j < exp_args.rwt_dg_length_and_width[1]:
+                    continue
+                self.lon_start_list.append(i)
+                self.lat_start_list.append(j)
+        self.candidate_size = len(self.lon_start_list)
+
+    def get_coordinate_by_idx(self, lon_idx, lat_idx):
+        return (self.area_coordinate[0] + lon_idx * self.grid_size_longitude_degree,
+                self.area_coordinate[0] + (lon_idx + self.exp_args.rwt_dg_length_and_width[0]) * self.grid_size_longitude_degree,
+                self.area_coordinate[2] + lat_idx * self.grid_size_latitude_degree,
+                self.area_coordinate[2] + (lat_idx + self.exp_args.rwt_dg_length_and_width[1]) * self.grid_size_latitude_degree)
+
+    def get_single_case(self, choice_key_list, change_checkin=False):
+        selected_POI_features = []
+        selected_land_use_features = []
+        for key in choice_key_list:
+            choice = self.choice_corresponding_features[key]
+            selected_POI_features.extend(choice['POI'])
+            selected_land_use_features.extend(choice['land_use'])
+        selected_POI_features = list(set(selected_POI_features))
+        selected_land_use_features = list(set(selected_land_use_features))
+
+        # calculate mask
+        mask_POI = np.zeros(self.n_POI_cate)
+        mask_POI[selected_POI_features] = 1
+        mask_pluto = np.zeros(self.n_pluto_cate)
+        mask_pluto[selected_land_use_features] = 1
+        mask_change_checkin = np.array([1]) if change_checkin else np.array([0])
+        mask_POI_handed = np.ones(3)
+        mask_pluto_handed = np.ones(3)
+        mask = np.concatenate((mask_POI, mask_pluto, mask_POI, mask_pluto,
+                               mask_POI_handed, mask_change_checkin, mask_pluto_handed))
+
+        return mask
