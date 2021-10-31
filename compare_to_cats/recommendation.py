@@ -5,6 +5,8 @@
 # @Date  : 2021/7/24
 # @Desc  : None
 import functools
+import pickle
+
 from tqdm import tqdm
 import os
 import pandas as pd
@@ -72,6 +74,8 @@ class RecommendationPreProcessor:
 
             for shop in shops:
                 if shop.upper() in shop_name.upper():
+                    if shop == 'Gap' and ('Singapore' in shop_name or 'Sagaponack' in shop_name):
+                        continue
                     lon = getattr(row, 'longitude')
                     lat = getattr(row, 'latitude')
                     lon_idx, lat_idx = self.get_area_id(lon, lat)
@@ -95,7 +99,7 @@ def HR(ordered_dis_list, shop_grid):
         if [lon_idx, lat_idx] in shop_grid:
             hits += 1
         if (i + 1) == node_list[id]:
-            HR.append(hits / shop_grid_num)
+            HR.append(hits / min(shop_grid_num, i + 1))
             id += 1
     return HR
 
@@ -116,7 +120,7 @@ def NDCG(ordered_dis_list, shop_grid):
         else:
             rel.append(0)
 
-        if (i + 1) < shop_num:
+        if (i + 1) <= shop_num:
             idcg_sum += 1 / math.log(i + 2, 2)
         IDCG.append(idcg_sum)
 
@@ -141,7 +145,9 @@ def cmp(x, y):
 
 if __name__ == '__main__':
     # shops = ['KFC', 'STARBUCKS', 'McDonald', 'Burger King', 'Subway', '7-Eleven', 'Nike']  # 'MARKET', 'PARK',
-    shops = ['DUANE READE', 'DUNKIN', 'CHASE BANK', 'RITE AID', 'APARTMENT']
+    shops = ['GAMESTOP', 'BANK OF AMERICA', 'NEW YORK SPORTS CLUB', 'POST OFFICE', 'DUANE READE', 'DUNKIN',
+             'CHASE BANK', 'RITE AID', 'APARTMENT', 'STARBUCKS', 'McDonald', 'Burger King', 'Subway', '7-Eleven',
+             'Gap']
 
     # set random seed
     random.seed(exp_args.seed)
@@ -165,7 +171,7 @@ if __name__ == '__main__':
     RPP = RecommendationPreProcessor(city_base_info, shops)
 
     # model and optimizer
-    model = torch.load("trained_model.pth")
+    model = torch.load("trained_model_2021-07-31_21-39.pth")
     if CUDA_AVAILABLE:
         model = model.to(DEVICE)
     model_val = {}
@@ -184,10 +190,11 @@ if __name__ == '__main__':
     # test
     with torch.no_grad():
         model.eval()
-
+        ExactSFRS_hr_ndcg_coordinate_list = {}
         for i in range(len(shops)):  # 对每个shop进行测试
             now_shop = shops[i]
             now_hr_ndcg_list = []
+            ExactSFRS_hr_ndcg_coordinate_list[now_shop] = []
             # 枚举当前店铺选中的gird，测试实验效果
             print(now_shop, file=outfile)
             print(now_shop, " start :")
@@ -211,6 +218,9 @@ if __name__ == '__main__':
                 now_ndcg = NDCG(ordered_dis_list, now_shop_grid)
                 now_hr_ndcg_list.append([now_hr, now_ndcg, lon_idx, lat_idx])
 
+                ori_lon_1, ori_lon_2, ori_lat_1, ori_lat_2 = test_ds.get_coordinate_by_idx(lon_idx, lat_idx)
+                ExactSFRS_hr_ndcg_coordinate_list[now_shop].append(
+                    [now_hr, now_ndcg, [ori_lon_1, ori_lon_2, ori_lat_1, ori_lat_2]])
             # 对选中不同grid的结果进行从大到小排序
             now_hr_ndcg_list = sorted(now_hr_ndcg_list, key=functools.cmp_to_key(mycmp=cmp))
             print("========== {} ==========".format(i))
@@ -226,7 +236,7 @@ if __name__ == '__main__':
 
                 print(k, " HR,", end='', file=outfile)
                 for t in range(len(now_hr_ndcg_list[k][0])):
-                    if t == len(now_hr_ndcg_list[k][0])-1:
+                    if t == len(now_hr_ndcg_list[k][0]) - 1:
                         print(now_hr_ndcg_list[k][0][t], file=outfile)
                     else:
                         print(now_hr_ndcg_list[k][0][t], ',', end='', file=outfile)
@@ -236,3 +246,6 @@ if __name__ == '__main__':
                         print(now_hr_ndcg_list[k][1][t], file=outfile)
                     else:
                         print(now_hr_ndcg_list[k][1][t], ',', end='', file=outfile)
+
+        output = open('ExactSFRS_hr_ndcg_coordinate_list.pkl', 'wb')
+        pickle.dump(ExactSFRS_hr_ndcg_coordinate_list, output)

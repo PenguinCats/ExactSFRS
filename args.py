@@ -73,9 +73,10 @@ class Args(object):
         self.N = 10
 
         # model setting
-        self.filter_size = [5, 3]
-        self.feature_dim = [92, 64, 32]
-        self.stride = [2, 2]
+        self.filter_size = [3]
+        # self.feature_dim = [92, 64, 32]  # NYC
+        self.feature_dim = [106, 64, 32]  # LAC
+        self.stride = [2]
         self.dropout_rate = 0.1
         self.delta = 0.3
         self.weight_decay = 0.00005

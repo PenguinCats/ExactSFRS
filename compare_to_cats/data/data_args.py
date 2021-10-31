@@ -13,7 +13,7 @@ class DataArgs:
         self.data_path = './data_file'
         self.POI_path = os.path.join(self.data_path, 'NYC_POI.csv')
 
-        self.area_coordinate = [-74.0096368441688, -73.84843113758568, 40.60648987398893, 40.76276709553611]
+        self.area_coordinate = [-74.006905, -73.959527, 40.707687, 40.751607]
         self.grid_size_longitude_degree = 0.001
         self.grid_size_latitude_degree = 0.001
 

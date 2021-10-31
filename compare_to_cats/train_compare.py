@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore")
 
 
 if __name__ == '__main__':
-    start_local_time = time.localtime()
+    start_local_time = time.strftime('%Y-%m-%d_%H-%M', time.localtime(time.time()))
 
     # init
     random.seed(exp_args.seed)
@@ -80,8 +80,8 @@ if __name__ == '__main__':
         model.train()
         for bd in train_dl:
             iter_inner_cnt += 1
-            print(bd[0][0].squeeze(0).size())
-            print(type(bd[0][0]))
+            # print(bd[0][0].squeeze(0).size())
+            # print(type(bd[0][0]))
 
             bd[0][0] = bd[0][0].squeeze(0)
             bd[0][1] = bd[0][1].squeeze(0)
@@ -135,6 +135,9 @@ if __name__ == '__main__':
             hr_epoch_item = []
             mrr_epoch_item = []
 
+            hr_epoch_item_20 = []
+            mrr_epoch_item_20 = []
+
             for tbd in test_dl:
                 # print(tbd)
                 pos_lon_idx, pos_lat_idx = tbd[2], tbd[3]
@@ -168,28 +171,26 @@ if __name__ == '__main__':
                 _, sorted_indices = torch.sort(distances_total, descending=False)
                 hr_epoch_item.append(hit_ratio(0, sorted_indices, exp_args.n_test_K))
                 mrr_epoch_item.append(mrr(0, sorted_indices, exp_args.n_test_K))
+                hr_epoch_item_20.append(hit_ratio(0, sorted_indices, 20))
+                mrr_epoch_item_20.append(mrr(0, sorted_indices, 20))
 
             hr_epoch_item = np.mean(hr_epoch_item)
             mrr_epoch_item = np.mean(mrr_epoch_item)
+            hr_epoch_item_20 = np.mean(hr_epoch_item_20)
+            mrr_epoch_item_20 = np.mean(mrr_epoch_item_20)
             hr_list.append(hr_epoch_item)
             mrr_list.append(mrr_epoch_item)
             logging.info('| Epoch {:02d} / {:04d} | HR@{} {:.4f} | MRR@{} {:.4f} |'.
                          format(epoch + 1, exp_args.train_epoch,
                                 exp_args.n_test_K, hr_epoch_item, exp_args.n_test_K, mrr_epoch_item))
+            logging.info('| Epoch {:02d} / {:04d} | HR@20 {:.4f} | MRR@20 {:.4f} |'.
+                         format(epoch + 1, exp_args.train_epoch,
+                                hr_epoch_item_20, mrr_epoch_item_20))
 
-    # # save trained city feature
-    # triplet.eval()
-    # with torch.no_grad():
-    #     origin_g_feature = triplet(torch.Tensor(city_data.grid_feature))
-    #     torch.save(origin_g_feature,
-    #                os.path.join(args.trained_model_dir,
-    #                             "city_feature_{}.pt".format(time.strftime("%m-%d_%H-%M", start_local_time))))
-    #
-    # # save model
-    # torch.save(triplet,
-    #            os.path.join(args.trained_model_dir, "model_{}.pkl".format(time.strftime("%Y-%m-%d_%H-%M", start_local_time))))
-    #
-    # logging.info(start_local_time)
+    # save model
+    torch.save(model, 'trained_model_{}.pth'.format(start_local_time))
+    logging.info(start_local_time)
+
     #
     # # draw train result
     # plt.figure()

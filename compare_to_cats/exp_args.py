@@ -46,9 +46,12 @@ class ExperimentArgs:
             [-73.99623167386585, 40.744621740014885]]
         # self.rwt_selected_feature = [['餐饮'], ['餐饮'], ['餐饮'], ['餐饮'], ['餐饮'], ['餐饮', '购物'], ['购物']]
         # self.rwt_concern_checkin = [True, True, True, True, True, True, True]
-        self.rwt_selected_feature = [['医疗', '购物'], ['餐饮'], ['便民服务'], ['医疗', '购物'], ['住宅区']]
-        self.rwt_concern_checkin = [True, True, False, True, False]
-        self.rwt_dg_length_and_width = [10, 10]
+        self.rwt_selected_feature = [['文娱', '购物'], ['便民服务', '住宅区'], ['文娱'], ['便民服务', '住宅区'], ['医疗', '购物'], ['餐饮'],
+                                     ['便民服务', '住宅区'], ['医疗', '购物'], ['住宅区'], ['餐饮'], ['餐饮'], ['餐饮'], ['餐饮'],
+                                     ['餐饮', '购物'], ['购物']]
+        self.rwt_concern_checkin = [True, False, True, False, True, True, False, True, False, True, True, True, True,
+                                    True, True]
+        self.rwt_dg_length_and_width = [5, 5]
         self.rwt_model_start_time = [2, 2]
         self.rwt_model_start_time = "2021-07-18_23-13"
 
